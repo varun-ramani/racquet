@@ -5,6 +5,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
+#include "request.h"
 
 int main(int argc, char *argv[]) {
     int status;
@@ -36,9 +37,11 @@ int main(int argc, char *argv[]) {
     char quit[] = "quit";
 
     recv(newsocketfd, buffer, 10000, 0);
-    printf("%s", buffer);
+    // printf("%s", buffer);
 
-
+    Request request = Request(buffer);
+    printf("Method: %d\n", request.getmethod());
+    printf("URI: %s\n", request.geturi());
 
     if (strcmp(quit, buffer) == 0) {
         printf("Goodbye!\n");
