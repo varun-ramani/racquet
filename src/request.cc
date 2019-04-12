@@ -27,7 +27,7 @@ Request::Request(char* request_text) {
         i++;
         requestpos++;
     }
-    buffer[i + 1] = '\0';
+    buffer[i] = '\0';
     strcpy(uri, buffer);
 }
 

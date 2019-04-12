@@ -1,3 +1,6 @@
+#ifndef REQUEST_H
+#define REQUEST_H
+
 class Request {
 
 public:
@@ -13,4 +16,7 @@ private:
     char body[10000];
     char uri[300];
     int method;
+
 };
+
+#endif
