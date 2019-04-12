@@ -1,4 +1,5 @@
 #include "server.h"
+#include "request.h"
 
 Server::Server(char* port) {
     int status;
@@ -41,14 +42,29 @@ Server::Server(char* port) {
 }
 
 // This is what actually starts the server
-int Server::start() {
+void Server::start() {
     printf("Accepting on :%s\n", this->port);
 
     sockaddr* incoming_addr;
     socklen_t* addr_size;
 
     // The program hangs and waits for a connection
-    return accept(this->socketfd, incoming_addr, addr_size);
+    int newsocketfd;
+    char buffer[10000];
+    while (true) {
+        memset(buffer, 0, 10000);
+        newsocketfd = accept(this->socketfd, incoming_addr, addr_size);
+
+        // Read HTTP request into buffer
+        // Generate Request object
+        // Request object is used to parse raw request into usable data
+        recv(newsocketfd, buffer, 10000, 0);
+        Request incoming_request = Request(buffer);
+
+        send(newsocketfd, "Received!", strlen("Received"), 0);
+        
+        close(newsocketfd);
+    }
 }
 
 Server::~Server() {

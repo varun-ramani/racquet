@@ -2,8 +2,13 @@
 #include <cstring>
 #include <cstdio>
 
+Request::~Request() {
+}
+
 Request::Request(char* request_text) {
     char buffer[10000];
+    memset(buffer, '\0' , 10000);
+
     int requestpos = 0;
 
     // Extract method
@@ -15,9 +20,21 @@ Request::Request(char* request_text) {
     }
     requestpos++;
     if (strcmp(buffer, "GET") == 0) {
-        method = GET;
+        method = REQUEST_GET;
     } else if (strcmp(buffer, "POST") == 0) {
-        method = POST;
+        method = REQUEST_POST;
+    } else if (strcmp(buffer, "HEAD") == 0) {
+        method = REQUEST_HEAD;
+    } else if (strcmp(buffer, "PUT") == 0) {
+        method = REQUEST_PUT;
+    } else if (strcmp(buffer, "DELETE") == 0) {
+        method = REQUEST_DELETE;
+    } else if (strcmp(buffer, "CONNECT") == 0) {
+        method = REQUEST_CONNECT;
+    } else if (strcmp(buffer, "OPTIONS") == 0) {
+        method = REQUEST_OPTIONS;
+    } else if (strcmp(buffer, "TRACE") == 0) {
+        method = REQUEST_TRACE;
     }
 
     // Extract route
@@ -31,14 +48,14 @@ Request::Request(char* request_text) {
     strcpy(uri, buffer);
 }
 
-int Request::getmethod() {
+int Request::get_method() {
     return method;
 }
 
-char* Request::getbody() {
+char* Request::get_body() {
     return body;
 }
 
-char *Request::geturi() {
+char *Request::get_uri() {
     return uri;
 }

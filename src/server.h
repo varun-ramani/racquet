@@ -16,7 +16,7 @@ public:
     Server(char* port);
     ~Server();
     int getsocketfd();
-    int start();
+    void start();
 
 private:
     int socketfd;
