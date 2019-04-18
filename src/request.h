@@ -19,6 +19,7 @@ public:
     int get_method();
     char* get_body();
     char* get_uri();
+    char* get_method_str();
 
 private:
     char body[10000];

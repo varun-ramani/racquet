@@ -1,5 +1,4 @@
 #include "server.h"
-#include "request.h"
 
 Server::Server(char* port) {
     int status;
@@ -15,8 +14,9 @@ Server::Server(char* port) {
     memset(&hints, 0, sizeof hints);
 
     // Specify some options 
-    hints.ai_family = AF_INET6;
+    hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
+    hints.ai_flags = AI_PASSIVE;
 
     // Run getaddrinfo and make sure that it worked
     if ((status = getaddrinfo(NULL, port, &hints, &servinfo)) != 0) {
@@ -31,7 +31,6 @@ Server::Server(char* port) {
     // Make socket reusable
     setsockopt(socketfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof yes);
 
-    // This code doesn't seem to work yet 
     setsockopt(socketfd, IPPROTO_IP, TCP_NODELAY, &yes, sizeof yes);
 
     // Bind to socket and start listening
@@ -45,15 +44,15 @@ Server::Server(char* port) {
 void Server::start() {
     printf("Accepting on :%s\n", this->port);
 
-    sockaddr* incoming_addr;
-    socklen_t* addr_size;
+    sockaddr incoming_addr;
+    socklen_t addr_size;
 
     // The program hangs and waits for a connection
     int newsocketfd;
     char buffer[10000];
     while (true) {
         memset(buffer, 0, 10000);
-        newsocketfd = accept(this->socketfd, incoming_addr, addr_size);
+        newsocketfd = accept(this->socketfd, &incoming_addr, &addr_size);
 
         // Read HTTP request into buffer
         // Generate Request object
@@ -62,7 +61,7 @@ void Server::start() {
         Request incoming_request = Request(buffer);
 
         send(newsocketfd, "Received!", strlen("Received"), 0);
-        
+
         close(newsocketfd);
     }
 }
@@ -73,4 +72,19 @@ Server::~Server() {
 
 int Server::getsocketfd() {
     return socketfd;
+}
+
+// Allows developer to assign routes and methods to functions
+void Server::assignFunction(char *route, int method, route_action routeaction) {
+    std::unordered_map<int, route_action>* routeContainer;
+    if (actions.find(route) == actions.end()) {
+        actions.insert(std::make_pair(route, *routeContainer));
+    }
+    Request r = Request((char*)"GET /nonginder ");
+    // routeaction(r);
+    //routeContainer->insert(std::make_pair(method, routeaction));
+}
+
+void Server::retrieveFunction(char* route, int method) {
+    printf("%lu", actions.find(route)->second.size());
 }
