@@ -58,9 +58,13 @@ void Server::start() {
         // Generate Request object
         // Request object is used to parse raw request into usable data
         recv(newsocketfd, buffer, 10000, 0);
+        printf("Buffer: %s\n", buffer);
         Request incoming_request = Request(buffer);
 
-        send(newsocketfd, "Received!", strlen("Received"), 0);
+        send(newsocketfd, "Received request!", strlen("Received request!"), 0);
+        printf("Hit route %s\n", incoming_request.get_uri());
+
+        retrieveFunction(incoming_request.get_uri(), incoming_request.get_method());
 
         close(newsocketfd);
     }
@@ -75,16 +79,16 @@ int Server::getsocketfd() {
 }
 
 // Allows developer to assign routes and methods to functions
-void Server::assignFunction(char *route, int method, route_action routeaction) {
-    std::unordered_map<int, route_action>* routeContainer;
+void Server::assignFunction(std::string route, int method, route_action routeaction) {
+    std::unordered_map<int, route_action>* routeContainer = new std::unordered_map<int, route_action>;
     if (actions.find(route) == actions.end()) {
-        actions.insert(std::make_pair(route, *routeContainer));
+        printf("Inserting new route\n");
+        actions.insert(std::make_pair(route, routeContainer));
+        printf("%s\n", actions.find(route)->first.c_str());
     }
-    Request r = Request((char*)"GET /nonginder ");
-    // routeaction(r);
-    //routeContainer->insert(std::make_pair(method, routeaction));
+    routeContainer->insert(std::make_pair(method, routeaction));
 }
 
-void Server::retrieveFunction(char* route, int method) {
-    printf("%lu", actions.find(route)->second.size());
+void Server::retrieveFunction(std::string route, int method) {
+    printf("%s\n", actions.find(route)->first.c_str());
 }

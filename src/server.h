@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <cstdio>
 #include <cstring>
+#include <string>
 #include <netdb.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -23,15 +24,13 @@ public:
     ~Server();
     int getsocketfd();
     void start();
-    void assignFunction(char* route, int method, route_action action);
-    void retrieveFunction(char* route, int method);
+    void assignFunction(std::string route, int method, route_action action);
+    void retrieveFunction(std::string route, int method);
 
 private:
     int socketfd;
     char port[10];
-    std::unordered_map<char*, std::unordered_map<int, route_action>> actions;
-    std::unordered_map<char*, int> actionsTest;
-
+    std::unordered_map<std::string, std::unordered_map<int, route_action>*> actions;
 };
 
 #endif
