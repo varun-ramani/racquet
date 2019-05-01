@@ -5,7 +5,7 @@ Server::Server(char* port) {
     strcpy(this->port, port);
 
 
-    // These structures hold the server-integral
+    // These structures hold the server specific
     // data
     addrinfo hints;
     addrinfo *servinfo;
@@ -22,7 +22,7 @@ Server::Server(char* port) {
     if ((status = getaddrinfo(NULL, port, &hints, &servinfo)) != 0) {
         printf("Error on getaddrinfo(): %s", gai_strerror(status));
     }
-
+    
     // Create socket 
     this->socketfd = socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol);
 
@@ -61,10 +61,12 @@ void Server::start() {
         printf("Buffer: %s\n", buffer);
         Request incoming_request = Request(buffer);
 
-        send(newsocketfd, "Received request!", strlen("Received request!"), 0);
+        char* response = (char*) "HTTP/1.1 200 OK\nDate: Sun, 28 Jul 2013 15:37:37 GMT\nServer: Racquet\nLast-Modified: Sun, 07 Jul 2013 06:13:43 GMT\nTransfer-Encoding: chunked\nConnection: Keep-Alive\nContent-Type: text/html; charset=UTF-8\n<h1>Hello</h1>";
+
+        send(newsocketfd, response, strlen(response), 0);
         printf("Hit route %s\n", incoming_request.get_uri());
 
-        retrieveFunction(incoming_request.get_uri(), incoming_request.get_method());
+        retrieveFunction(incoming_request.get_uri(), incoming_request.get_method(), incoming_request);
 
         close(newsocketfd);
     }
@@ -79,7 +81,7 @@ int Server::getsocketfd() {
 }
 
 // Allows developer to assign routes and methods to functions
-void Server::assignFunction(std::string route, int method, route_action routeaction) {
+void Server::assignStaticPath(std::string route, int method, route_action routeaction) {
     std::unordered_map<int, route_action>* routeContainer = new std::unordered_map<int, route_action>;
     if (actions.find(route) == actions.end()) {
         printf("Inserting new route\n");
@@ -89,6 +91,12 @@ void Server::assignFunction(std::string route, int method, route_action routeact
     routeContainer->insert(std::make_pair(method, routeaction));
 }
 
-void Server::retrieveFunction(std::string route, int method) {
-    printf("%s\n", actions.find(route)->first.c_str());
+void Server::retrieveFunction(std::string route, int method, Request request) {
+    // printf("%s\n", actions.find(route)->first.c_str());]
+    if (actions.find(route) == actions.end()) {
+        printf("Route %s not valid\n", route.c_str());
+    } else {
+        route_action action = actions.find(route)->second->find(method)->second;
+        action(request);
+    }
 }

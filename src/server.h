@@ -13,19 +13,19 @@
 #include <unordered_map>
 #include <iterator>
 #include "request.h"
+#include <iostream>
 
 typedef char* (*route_action)(Request);
 
 class Server {
-
 
 public:
     Server(char* port);
     ~Server();
     int getsocketfd();
     void start();
-    void assignFunction(std::string route, int method, route_action action);
-    void retrieveFunction(std::string route, int method);
+    void assignStaticPath(std::string route, int method, route_action action);
+    void retrieveFunction(std::string route, int method, Request request);
 
 private:
     int socketfd;
