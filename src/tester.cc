@@ -1,24 +1,24 @@
 #include "request.h"
 #include "server.h"
 
-char *index(Request request) {
-    printf("Hit index!\n");
-    return (char*)"";
-    //return request.get_body();
-}
+char* htmlPage = 
+    "<h1>Welcome to </h1><h1 style='color: red'>Racquet</h1>"; // I am going to serve this HTML to microsoft edge
 
-char *home(Request request) {
-    printf("Welcome home!\n");
-    return (char*)"";
+char* home(Request request) {
+    return htmlPage;
 }
 
 
-int main(int argc, char *argv[]) {
+char* index(Request request) {
+    return "Welcome to Racquet!";
+}
 
-    Server server = Server((char*)"3490");
-    server.assignStaticPath(std::string("/"), REQUEST_GET, index);
-    server.assignStaticPath(std::string("/home"), REQUEST_GET, home);
+
+int main() {
+    Server server = Server((char*) "3490");
+
+    server.assignStaticPath("/home", REQUEST_GET, home);
+    server.assignStaticPath("/", REQUEST_GET, index);
+
     server.start();
-
-    return 0;
 }

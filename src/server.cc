@@ -61,12 +61,13 @@ void Server::start() {
         printf("Buffer: %s\n", buffer);
         Request incoming_request = Request(buffer);
 
-        char* response = (char*) "HTTP/1.1 200 OK\nDate: Sun, 28 Jul 2013 15:37:37 GMT\nServer: Racquet\nLast-Modified: Sun, 07 Jul 2013 06:13:43 GMT\nTransfer-Encoding: chunked\nConnection: Keep-Alive\nContent-Type: text/html; charset=UTF-8\n<h1>Hello</h1>";
+        // char* response = (char*) "HTTP/1.1 200 OK\nDate: Sun, 28 Jul 2013 15:37:37 GMT\nServer: Racquet\nLast-Modified: Sun, 07 Jul 2013 06:13:43 GMT\nTransfer-Encoding: chunked\nConnection: Keep-Alive\nContent-Type: text/html; charset=UTF-8\n<h1>Hello</h1>";
+        route_action action = retriveStaticAction(incoming_request.get_uri(), incoming_request.get_method());
+        char* response = action(incoming_request);
 
         send(newsocketfd, response, strlen(response), 0);
         printf("Hit route %s\n", incoming_request.get_uri());
 
-        retrieveFunction(incoming_request.get_uri(), incoming_request.get_method(), incoming_request);
 
         close(newsocketfd);
     }
@@ -91,12 +92,12 @@ void Server::assignStaticPath(std::string route, int method, route_action routea
     routeContainer->insert(std::make_pair(method, routeaction));
 }
 
-void Server::retrieveFunction(std::string route, int method, Request request) {
+route_action Server::retriveStaticAction(std::string route, int method) {
     // printf("%s\n", actions.find(route)->first.c_str());]
     if (actions.find(route) == actions.end()) {
         printf("Route %s not valid\n", route.c_str());
     } else {
         route_action action = actions.find(route)->second->find(method)->second;
-        action(request);
+        return action;
     }
 }

@@ -24,13 +24,14 @@ public:
     ~Server();
     int getsocketfd();
     void start();
+    route_action retriveStaticAction(std::string route, int method);
     void assignStaticPath(std::string route, int method, route_action action);
-    void retrieveFunction(std::string route, int method, Request request);
 
 private:
     int socketfd;
     char port[10];
     std::unordered_map<std::string, std::unordered_map<int, route_action>*> actions;
+    
 };
 
 #endif
