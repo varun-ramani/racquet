@@ -1,24 +1,37 @@
+/*
+    Copyright (c) Varun Ramani. All rights reserved
+*/
+
 #include "request.h"
 #include "server.h"
-
-char* htmlPage = 
-    "<h1>Welcome to </h1><h1 style='color: red'>Racquet</h1>"; // I am going to serve this HTML to microsoft edge
-
-char* home(Request request) {
-    return htmlPage;
-}
-
+#include "response.h"
 
 char* index(Request request) {
-    return "Welcome to Racquet!";
+    Response response = Response();
+
+    // Load an HTML file into the body buffer contained within response
+    response.readFileIntoBody("static/index.html");
+
+    // Add up all the buffers and send them to the server
+    return response.generateResponseText();
 }
 
+char* mainCSS(Request request) {
+    printf("Method run\n");
+    Response response = Response();
+    response.readFileIntoBody("static/main.css");
+    return response.generateResponseText();
+}
+
+char* dynamicFunction(Request request, char* variables[]) {
+    printf("First variable: %s\n", variables[0]);
+    return "Hello";
+}
 
 int main() {
     Server server = Server((char*) "3490");
-
-    server.assignStaticPath("/home", REQUEST_GET, home);
     server.assignStaticPath("/", REQUEST_GET, index);
-
+    server.assignDynamicPath("/goon", REQUEST_GET, dynamicFunction);
+    
     server.start();
 }

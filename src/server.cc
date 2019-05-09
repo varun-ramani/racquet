@@ -1,3 +1,7 @@
+/*
+    Copyright (c) Varun Ramani. All rights reserved
+*/
+
 #include "server.h"
 
 Server::Server(char* port) {
@@ -61,9 +65,15 @@ void Server::start() {
         printf("Buffer: %s\n", buffer);
         Request incoming_request = Request(buffer);
 
-        // char* response = (char*) "HTTP/1.1 200 OK\nDate: Sun, 28 Jul 2013 15:37:37 GMT\nServer: Racquet\nLast-Modified: Sun, 07 Jul 2013 06:13:43 GMT\nTransfer-Encoding: chunked\nConnection: Keep-Alive\nContent-Type: text/html; charset=UTF-8\n<h1>Hello</h1>";
-        route_action action = retriveStaticAction(incoming_request.get_uri(), incoming_request.get_method());
-        char* response = action(incoming_request);
+        static_route_action action_static;
+        dynamic_route_action action_dynamic;
+
+        char* response;
+        if ((action_static = retriveStaticAction(incoming_request.get_uri(), incoming_request.get_method())) != NULL) {
+            response = action_static(incoming_request);
+        } else {
+            response = "INVALID URL";
+        }
 
         send(newsocketfd, response, strlen(response), 0);
         printf("Hit route %s\n", incoming_request.get_uri());
@@ -82,22 +92,49 @@ int Server::getsocketfd() {
 }
 
 // Allows developer to assign routes and methods to functions
-void Server::assignStaticPath(std::string route, int method, route_action routeaction) {
-    std::unordered_map<int, route_action>* routeContainer = new std::unordered_map<int, route_action>;
-    if (actions.find(route) == actions.end()) {
+void Server::assignStaticPath(std::string route, int method, static_route_action routeaction) {
+    auto routeContainer = new std::unordered_map<int, static_route_action>;
+    if (staticActions.find(route) == staticActions.end()) {
         printf("Inserting new route\n");
-        actions.insert(std::make_pair(route, routeContainer));
-        printf("%s\n", actions.find(route)->first.c_str());
+        staticActions.insert(std::make_pair(route, routeContainer));
+        printf("%s\n", staticActions.find(route)->first.c_str());
     }
     routeContainer->insert(std::make_pair(method, routeaction));
+    printf("Reached end of static assignment\n");
 }
 
-route_action Server::retriveStaticAction(std::string route, int method) {
-    // printf("%s\n", actions.find(route)->first.c_str());]
-    if (actions.find(route) == actions.end()) {
+void Server::assignDynamicPath(std::string route, int method, dynamic_route_action routeaction) {
+    auto routeContainer = new std::unordered_map<int, dynamic_route_action>;
+    if (dynamicActions.find(route) == dynamicActions.end()) {
+        printf("Inserting new route\n");
+        dynamicActions.insert(std::make_pair(route, routeContainer));
+        printf("%s\n", dynamicActions.find(route)->first.c_str());
+    }
+    routeContainer->insert(std::make_pair(method, routeaction));
+    printf("Reached end of dynamic assignment\n");
+}
+
+static_route_action Server::retriveStaticAction(std::string route, int method) {
+    // printf("%s\n", staticActions.find(route)->first.c_str());]
+    if (staticActions.find(route) == staticActions.end()) {
         printf("Route %s not valid\n", route.c_str());
+        return NULL;
     } else {
-        route_action action = actions.find(route)->second->find(method)->second;
+        static_route_action action = staticActions.find(route)->second->find(method)->second;
         return action;
+    }
+}
+
+dynamic_route_action Server::retriveDynamicAction(std::string route, int method) {
+    for (auto &pair : dynamicActions) {
+        printf("Iterating\n");
+        printf("Comparing %s with %s\n", route.c_str(), pair.first.c_str());
+        auto mismatchRef = std::mismatch(route.begin(), route.end(), pair.first.begin());
+        if (mismatchRef.first == route.end()) {
+            printf("We have taken the L\n");
+            return NULL;
+        } else {
+            return pair.second->find(method)->second;
+        }
     }
 }

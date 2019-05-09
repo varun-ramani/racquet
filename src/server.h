@@ -1,3 +1,7 @@
+/*
+    Copyright (c) Varun Ramani. All rights reserved
+*/
+
 #ifndef SERVER_H
 #define SERVER_H
 
@@ -15,7 +19,8 @@
 #include "request.h"
 #include <iostream>
 
-typedef char* (*route_action)(Request);
+typedef char* (*static_route_action)(Request);
+typedef char* (*dynamic_route_action)(Request, char *array[]);
 
 class Server {
 
@@ -24,14 +29,16 @@ public:
     ~Server();
     int getsocketfd();
     void start();
-    route_action retriveStaticAction(std::string route, int method);
-    void assignStaticPath(std::string route, int method, route_action action);
+    static_route_action retriveStaticAction(std::string route, int method);
+    dynamic_route_action retriveDynamicAction(std::string route, int method);
+    void assignStaticPath(std::string route, int method, static_route_action action);
+    void assignDynamicPath(std::string route, int method, dynamic_route_action action);
 
 private:
     int socketfd;
     char port[10];
-    std::unordered_map<std::string, std::unordered_map<int, route_action>*> actions;
-    
+    std::unordered_map<std::string, std::unordered_map<int, static_route_action>*> staticActions;
+    std::unordered_map<std::string, std::unordered_map<int, dynamic_route_action>*> dynamicActions;
 };
 
 #endif

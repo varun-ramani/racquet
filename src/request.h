@@ -1,3 +1,7 @@
+/*
+    Copyright (c) Varun Ramani. All rights reserved
+*/
+
 #ifndef REQUEST_H
 #define REQUEST_H
 
@@ -13,18 +17,19 @@
 
 class Request {
 
-public:
-    Request(char* request_text);
-    ~Request();
-    int get_method();
-    char* get_body();
-    char* get_uri();
-    char* get_method_str();
+    public:
+        Request(char* request_text);
+        ~Request();
+        int get_method();
+        char* get_body();
+        char* get_uri();
+        char** get_uri_segments();
+        char* get_method_str();
 
-private:
-    char body[10000];
-    char uri[300];
-    int method;
+    private:
+        char body[10000];
+        char uri[300];
+        int method;
 };
 
 #endif

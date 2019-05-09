@@ -1,8 +1,20 @@
+/*
+    Copyright (c) Varun Ramani. All rights reserved
+*/
+
 #include "request.h"
 #include <cstring>
 #include <cstdio>
+#include <vector>
 
 Request::~Request() {
+}
+
+char** Request::get_uri_segments() {
+    auto thisvector = std::vector<char*>();
+    for (int i = 0; i < (std::end(body) - std::begin(body)); i++) {
+        
+    }
 }
 
 Request::Request(char* request_text) {
